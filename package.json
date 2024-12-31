@@ -1,0 +1,22 @@
+{
+  "name": "lib-wallet-pricing-provider",
+  "version": "0.0.1",
+  "description": "Pricing provider for the WDK-UI",
+  "license": "APACHE-2.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --testRegex=index.test.js",
+    "lint": "standard",
+    "types": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir . --lib ES2015"
+  },
+  "type": "module",
+  "author": "",
+  "types": "./index.d.ts",
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "jest": "^29.7.0",
+    "standard": "^17.1.2",
+    "typescript": "^5.7.2"
+  }
+}
