@@ -57,7 +57,7 @@ const historicalPrice = await provider.getHistoricalPrice({
 
 For detailed usage examples, please check the included test file `index.test.js` of this repository.
 
-This project is ued in lib-wallet UI to provide client agnostic pricing functionality.
+This project is used in lib-wallet UI to provide client agnostic pricing functionality.
 
 The following clients are available:
 
