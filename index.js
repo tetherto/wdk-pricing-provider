@@ -61,9 +61,7 @@ export class PricingProvider {
    */
   async getLastPrice (from, to) {
     const now = Date.now()
-    if (this.lastPriceTimestamp && now - this.lastPriceTimestamp < this.priceCacheDurationMs) {
-      return this.lastPriceValue
-    }
+
 
     const price = await this.client.getCurrentPrice(from, to)
     this.lastPriceValue = price
