@@ -1,6 +1,6 @@
 {
   "name": "lib-wallet-pricing-provider",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Pricing provider for the WDK-UI",
   "license": "APACHE-2.0",
   "main": "index.js",
