@@ -48,8 +48,7 @@ export class PricingProvider {
     this.client = config.client
     this.priceCacheDurationMs = config.priceCacheDurationMs || 60 * 60 * 1000
 
-    this.lastPriceValue = null
-    this.lastPriceTimestamp = null
+    this.priceCacheStore = {};
   }
 
   /**
@@ -61,13 +60,19 @@ export class PricingProvider {
    */
   async getLastPrice (from, to) {
     const now = Date.now()
-    if (this.lastPriceTimestamp && now - this.lastPriceTimestamp < this.priceCacheDurationMs) {
-      return this.lastPriceValue
+    const cacheKey = `${from.toUpperCase()}${to.toUpperCase()}`
+    if (this.priceCacheStore[cacheKey]) {
+      let lastPriceTimestamp = this.priceCacheStore[cacheKey].lastPriceTimestamp;
+      if (lastPriceTimestamp && now - lastPriceTimestamp < this.priceCacheDurationMs) {
+        return this.priceCacheStore[cacheKey].lastPriceValue
+      }
     }
 
     const price = await this.client.getCurrentPrice(from, to)
-    this.lastPriceValue = price
-    this.lastPriceTimestamp = now
+    this.priceCacheStore[cacheKey] = {
+      lastPriceValue: price,
+      lastPriceTimestamp: now
+    }
 
     return price
   }
