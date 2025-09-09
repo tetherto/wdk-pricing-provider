@@ -42,8 +42,7 @@ export class PricingProvider {
     constructor(config?: Config);
     client: any;
     priceCacheDurationMs: any;
-    lastPriceValue: any;
-    lastPriceTimestamp: number;
+    priceCacheStore: {};
     /**
      * Returns the last fetched price of the asset pair, cached for the duration of the priceCacheDurationMs
      * @async
