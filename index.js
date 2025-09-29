@@ -73,7 +73,6 @@ export class PricingProvider {
       lastPriceValue: price,
       lastPriceTimestamp: now
     }
-
     return price
   }
 
