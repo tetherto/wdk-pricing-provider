@@ -29,6 +29,9 @@ jobs:
       - name: Run tests
         run: yarn test
 
+      - name: Run bare runtime test
+        run: yarn run test:bare
+
   publish:
     needs: test
     runs-on: ubuntu-latest

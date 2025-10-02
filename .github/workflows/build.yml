@@ -36,3 +36,6 @@ jobs:
 
       - name: Run integration tests
         run: yarn run test:integration
+
+      - name: Run bare runtime test
+        run: yarn run test:bare

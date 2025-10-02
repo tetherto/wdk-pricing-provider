@@ -1,28 +1,75 @@
 {
-  "name": "lib-wallet-pricing-provider",
+  "name": "wdk-pricing-provider",
   "version": "0.1.0",
   "description": "Pricing provider for the WDK-UI",
+  "keywords": [
+    "wdk",
+    "wallet",
+    "bitcoin",
+    "ethereum",
+    "pricing",
+    "provider",
+    "bitfinex",
+    "blockchain"
+  ],
   "license": "APACHE-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/tetherto/wdk-pricing-provider.git"
+  },
   "main": "index.js",
   "scripts": {
-    "test": "jest --testRegex=index.test.js",
-    "test:integration": "jest --runInBand --testRegex=index.integration.test.js",
     "lint": "standard",
-    "types": "npx -p typescript tsc index.js --declaration --allowJs --emitDeclarationOnly --outDir . --lib ES2015"
+    "lint:fix": "standard --fix",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test:integration": "cross-env NODE_OPTIONS=--experimental-vm-modules jest tests/integration",
+    "test:integration:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest tests/integration --coverage",
+    "test:bare": "bare tests/bare-runtime.test.mjs",
+    "build:types": "tsc"
   },
   "type": "module",
-  "author": "",
+  "author": "Tether",
   "types": "./index.d.ts",
-  "devDependencies": {
-    "@babel/core": "^7.26.0",
-    "@babel/preset-env": "^7.26.0",
-    "jest": "^30.2.0",
-    "standard": "^17.1.2",
-    "typescript": "^5.7.2"
-  },
   "packageManager": "yarn@1.22.22",
   "engines": {
     "node": ">=18",
     "yarn": "1.22.22"
+  },
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "bare": "./bare.js",
+      "default": "./index.js"
+    },
+    "./package": {
+      "default": "./package.json"
+    }
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "standard": {
+    "ignore": [
+      "bare.js",
+      "tests/**/*.js"
+    ]
+  },
+  "dependencies": {
+    "bare-wdk-runtime": "^2.0.1"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "brittle": "^3.0.0",
+    "bare": "^1.22.0",
+    "jest": "^30.2.0",
+    "standard": "^17.1.2",
+    "typescript": "^5.7.2"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/tests/bare-runtime.test.mjs$"
+    ]
   }
 }
