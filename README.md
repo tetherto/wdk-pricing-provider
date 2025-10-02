@@ -34,6 +34,10 @@ npm install lib-wallet-pricing-provider
 ## 💡 Quick Start
 
 ```javascript
+// Imports
+import { PricingProvider } from "lib-wallet-pricing-provider";
+import { BitfinexPricingClient } from "lib-wallet-pricing-bitfinex-http";
+
 // Initialise the client, in this case a Bitfinex client
 const client = new BitfinexPricingClient();
 
@@ -46,7 +50,7 @@ const provider = new PricingProvider({
 // Get latest price for BTCUSD. The price will be cached for 1 hour.
 const currentPrice = await provider.getLastPrice("BTC", "USD");
 
-// Get Hitorical price for given ticker and interval
+// Get historical price for given ticker and interval
 const historicalPrice = await provider.getHistoricalPrice({
   from: "BTC",
   to: "USD",
@@ -57,7 +61,7 @@ const historicalPrice = await provider.getHistoricalPrice({
 
 ## 🔍 Usage Examples
 
-For detailed usage examples, please check the included test file `index.test.js` of this repository.
+For detailed usage examples, please check the included test files `index.test.js` and `index.integration.test.js` in this repository.
 
 This project is used in lib-wallet UI to provide client agnostic pricing functionality.
 
