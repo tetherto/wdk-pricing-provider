@@ -1,8 +1,9 @@
 {
-  "name": "wdk-pricing-provider",
+  "name": "@tetherto/wdk-pricing-provider",
   "version": "0.1.0",
   "description": "Pricing provider for the WDK-UI",
   "keywords": [
+    "tetherto",
     "wdk",
     "wallet",
     "bitcoin",
@@ -15,7 +16,7 @@
   "license": "APACHE-2.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/tetherto/wdk-pricing-provider.git"
+    "url": "git://github.com/tetherto/lib-wallet-pricing-provider.git"
   },
   "main": "index.js",
   "scripts": {
