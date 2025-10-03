@@ -1,56 +1,45 @@
-<p align="center" width="100">
-<a href="https://github.com/tetherto/lib-wallet">
-<img src="https://github.com/tetherto/lib-wallet/blob/main/docs/logo.svg" width="200"/>
-</a>
-</p>
+# @tetherto/wdk-pricing-provider
 
-# ⚛️ wdk-pricing-provider
+Simple, cache-aware pricing provider utilities for WDK-based apps and the [WDK UI Kit](https://github.com/tetherto/wdk-uikit-react-native). It defines two core building blocks: `PricingClient` (an abstract fetcher that you implement) and `PricingProvider` (a wrapper that adds caching and a unified API).
 
-This library is a pricing provider for the wdk UI. It includes two classes: `PricingClient` and `PricingProvider`. `PricingClient` is an abstract class that must be implemented by the client. `PricingProvider` is a wrapper around `PricingClient` that provides caching for the current price.
+## 🔍 About WDK
 
-## 📋 Table of Contents
+This module is part of the WDK (Wallet Development Kit) ecosystem, which helps developers build secure, non-custodial wallets and related services.
 
-- [⚛️ wdk-pricing-provider](#️-wdk-pricing-provider)
-  - [📋 Table of Contents](#-table-of-contents)
-  - [✨ Features](#-features)
-  - [🚀 Installation](#-installation)
-  - [💡 Quick Start](#-quick-start)
-  - [🔍 Usage Examples](#-usage-examples)
-  - [🔗 Related Projects](#-related-projects)
+For more on the WDK project, visit [docs.wallet.tether.io](https://docs.wallet.tether.io).
 
 ## ✨ Features
 
-- Generic pricing provider which can be extended by different pricing clients
-- Get the current price of an asset pair
-- Get the historical price of an asset pair
-- Caching of the last price and the historical price
+- Minimal, composable pricing abstraction
+- Pluggable client model (`PricingClient`)
+- Built-in caching via `PricingProvider`
+- Last price and historical price helpers
 
-## 🚀 Installation
+## ⬇️ Installation
 
 ```bash
 npm install wdk-pricing-provider
 ```
 
-## 💡 Quick Start
+## 🚀 Quick Start
 
 ```javascript
-// Imports
-import { PricingProvider } from "wdk-pricing-provider";
-import { BitfinexPricingClient } from "wdk-pricing-bitfinex-http";
+import { PricingProvider } from "@tetherto/wdk-pricing-provider";
+import { BitfinexPricingClient } from "@tetherto/wdk-pricing-bitfinex-http";
 
-// Initialise the client, in this case a Bitfinex client
+// Create a concrete PricingClient implementation
 const client = new BitfinexPricingClient();
 
-// Initialise the provider
+// Wrap the client with a cache-enabled provider
 const provider = new PricingProvider({
   client,
-  priceCacheDurationMs: 1000 * 60 * 60, // 1 hour
+  cacheTTL: 60 * 60 * 1000, // 1 hour cache in ms
 });
 
-// Get latest price for BTCUSD. The price will be cached for 1 hour.
+// Get latest price
 const currentPrice = await provider.getLastPrice("BTC", "USD");
 
-// Get historical price for given ticker and interval
+// Get historical price
 const historicalPrice = await provider.getHistoricalPrice({
   from: "BTC",
   to: "USD",
@@ -59,18 +48,60 @@ const historicalPrice = await provider.getHistoricalPrice({
 });
 ```
 
+## 📚 API Reference
+
+### PricingProvider
+
+```javascript
+new PricingProvider(options);
+```
+
+Parameters:
+
+- `options.client`: Instance of your `PricingClient` implementation
+- `options.cacheTTL` (number, optional): Cache time for last price lookups in ms
+
+Methods:
+
+- `getLastPrice(base: string, quote: string): Promise<number>`
+- `getHistoricalPrice({ from, to, start?, end? }): Promise<number>`
+
+### PricingClient (abstract)
+
+You implement this interface for your data source (e.g., Bitfinex, Coinbase, etc.). At a minimum, provide methods that `PricingProvider` uses to fetch spot and historical prices.
+
 ## 🔍 Usage Examples
 
 For detailed usage examples, please check the included test files `index.test.js` and `index.integration.test.js` in this repository.
 
-This project is used in wdk UI to provide client agnostic pricing functionality.
-
-The following clients are available:
-
-- [Bitfinex HTTP](https://github.com/tetherto/wdk-pricing-bitfinex-http)
-
 ## 🔗 Related Projects
 
-This project is part of the [wdk](https://github.com/tetherto/wdk) ecosystem. See the following projects for more information:
+- Bitfinex HTTP client: [wdk-pricing-bitfinex-http](https://github.com/tetherto/wdk-pricing-bitfinex-http)
 
-- [Lib Wallet Pricing Bitfinex HTTP](https://github.com/tetherto/wdk-pricing-bitfinex-http)
+## 🛠️ Development
+
+```bash
+# Install dependencies
+npm install
+
+# Lint
+npm run lint
+npm run lint:fix
+
+# Tests
+npm test
+```
+
+## 📜 License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 🆘 Support
+
+For support, please open an issue on the GitHub repository.
+
+---
