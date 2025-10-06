@@ -15,7 +15,7 @@
 //
 
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
-import { PricingProvider } from './index.js'
+import { PricingProvider } from '../index.js'
 
 describe('PricingProvider', () => {
   describe('getLastPrice', () => {

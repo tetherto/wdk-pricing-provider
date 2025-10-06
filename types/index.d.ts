@@ -1,20 +1,3 @@
-export interface Config {
-  client: any;
-  priceCacheDurationMs: number;
-}
-
-export interface HistoricalPriceOptions {
-  from: string;
-  to: string;
-  start: number;
-  end: number;
-}
-
-export interface HistoricalPriceResult {
-  date: number;
-  price: number;
-}
-
 export class PricingClient {
     /**
      * Returns the current price of the asset pair, cached for the duration of the priceCacheDurationMs
@@ -42,8 +25,7 @@ export class PricingProvider {
     constructor(config?: Config);
     client: any;
     priceCacheDurationMs: any;
-    lastPriceValue: any;
-    lastPriceTimestamp: number;
+    priceCacheStore: {};
     /**
      * Returns the last fetched price of the asset pair, cached for the duration of the priceCacheDurationMs
      * @async
