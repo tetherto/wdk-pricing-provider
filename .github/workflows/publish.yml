@@ -1,6 +1,17 @@
 name: publish
 
 on:
+  # Allow calling this workflow from other workflows (local tests with act)
+  workflow_call:
+    inputs:
+      dry_run:
+        type: boolean
+        required: false
+        default: true
+    secrets:
+      NPM_TOKEN:
+        required: false
+
   release:
     types: [published]
 
@@ -14,23 +25,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22.19.0"
-          cache: "yarn"
-          cache-dependency-path: "yarn.lock"
-
-      - name: Install Yarn 1.22.22
-        run: npm i -g yarn@1.22.22
+          cache: "npm"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
+
+      - name: Install Bare
+        run: npm install -g bare
 
       - name: Lint code with standard
-        run: yarn run lint
+        run: npm run lint
 
       - name: Run tests
-        run: yarn test
+        run: npm test
 
       - name: Run bare runtime test
-        run: yarn run test:bare
+        run: npm run test:bare
 
   publish:
     needs: test
@@ -43,17 +54,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22.19.0"
-          cache: "yarn"
-          cache-dependency-path: "yarn.lock"
+          cache: "npm"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Install Yarn 1.22.22
-        run: npm i -g yarn@1.22.22
-
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
+      # Dry-run when invoked via workflow_call with dry_run=true
+      - name: Publish to npm (dry-run)
+        if: ${{ github.event_name != 'release' && inputs.dry_run }}
+        run: npm publish --dry-run
+
+      # Real publish when release event OR dry_run=false
       - name: Publish to npm
+        if: ${{ github.event_name == 'release' || !inputs.dry_run }}
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

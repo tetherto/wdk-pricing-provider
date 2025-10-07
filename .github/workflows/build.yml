@@ -17,28 +17,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22.19.0"
-          cache: "yarn"
-          cache-dependency-path: "yarn.lock"
           registry-url: "https://registry.npmjs.org"
           always-auth: false
 
-      - name: Install Yarn 1.22.22
-        run: npm i -g yarn@1.22.22
-
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Install Bare
-        run: yarn add bare
+        run: npm install -g bare
 
       - name: Lint code with standard
-        run: yarn run lint
+        run: npm run lint
 
       - name: Run unit tests
-        run: yarn test
+        run: npm test
 
       - name: Run integration tests
-        run: yarn run test:integration
+        run: npm run test:integration
 
       - name: Run bare runtime test
-        run: yarn run test:bare
+        run: npm run test:bare
