@@ -30,15 +30,9 @@ class BitfinexHttpPricingClient {
     return lastPrice
   }
 
-  async getHistoricalPrice (opts) {
-    const { from, to, start, end } = opts
+  async getHistoricalPrice (from, to) {
     const symbol = `t${from.toUpperCase()}${to.toUpperCase()}`
-    // Use 1h candles for a compact sample. Sorted ascending for readability
-    const params = new URLSearchParams()
-    if (typeof start === 'number') params.set('start', String(start))
-    if (typeof end === 'number') params.set('end', String(end))
-    params.set('sort', '1')
-    const url = `https://api-pub.bitfinex.com/v2/candles/trade:1h:${symbol}/hist?${params.toString()}`
+    const url = `https://api-pub.bitfinex.com/v2/candles/trade:1h:${symbol}/hist?sort=1`
     const data = await fetchJson(url)
     // Candle item format: [ MTS, OPEN, CLOSE, HIGH, LOW, VOLUME ]
     if (!Array.isArray(data) || data.length === 0) return []
@@ -92,10 +86,7 @@ describe('PricingProvider Live Integration (Bitfinex HTTP)', () => {
 
   it('should fetch live historical prices for BTC/USD', async () => {
     const provider = new PricingProvider({ client: new BitfinexHttpPricingClient(), priceCacheDurationMs: 0 })
-    const end = Date.now()
-    const sixHours = 6 * 60 * 60 * 1000
-    const start = end - sixHours
-    const results = await provider.getHistoricalPrice({ from: 'BTC', to: 'USD', start, end })
+    const results = await provider.getHistoricalPrice('BTC', 'USD')
     // eslint-disable-next-line no-console
     console.log('Live BTC/USD historical sample:', results.slice(0, 3))
     expect(Array.isArray(results)).toBe(true)
