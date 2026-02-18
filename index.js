@@ -32,6 +32,13 @@
  */
 
 /**
+ * @typedef {Object} PriceData
+ * @property {number} lastPrice - The last traded price
+ * @property {number} dailyChange - Absolute price change over the last 24h
+ * @property {number} dailyChangeRelative - Relative price change over the last 24h (multiply by 100 for percentage)
+ */
+
+/**
  * @typedef {Object} PricingProviderConfig
  * @property {PricingClient} client - The pricing client instance
  * @property {number} [priceCacheDurationMs=3600000] - Cache duration in milliseconds, defaults to 1 hour
@@ -58,6 +65,21 @@ export class PricingClient {
   }
 
   /**
+   * Returns full price data (last price, daily change) for multiple asset pairs.
+   * Defaults to calling getCurrentPrice per pair with zeroed change fields.
+   * Override in subclasses for efficient batch fetching with full data.
+   * @param {PricePair[]} list - Array of asset pairs
+   * @returns {Promise<PriceData[]>}
+   */
+  async getMultiPriceData (list) {
+    return Promise.all(list.map(async ({ from, to }) => ({
+      lastPrice: await this.getCurrentPrice(from, to),
+      dailyChange: 0,
+      dailyChangeRelative: 0
+    })))
+  }
+
+  /**
    * Returns the historical price of an asset pair
    * @param {string} from - Source asset symbol
    * @param {string} to - Target asset symbol
@@ -79,6 +101,9 @@ export class PricingProvider {
 
     /** @type {Object<string, { lastPriceValue: number, lastPriceTimestamp: number }>} */
     this.priceCacheStore = {}
+
+    /** @type {Object<string, { priceData: PriceData, lastPriceTimestamp: number }>} */
+    this.priceDataCacheStore = {}
   }
 
   /**
@@ -116,6 +141,61 @@ export class PricingProvider {
    */
   async getMultiLastPrices (list, options = {}) {
     return Promise.all(list.map(({ from, to }) => this.getLastPrice(from, to, options)))
+  }
+
+  /**
+   * Returns full price data for an asset pair, cached for the duration of priceCacheDurationMs.
+   * Includes last price, daily change, and relative daily change.
+   * @param {string} from - Source asset symbol
+   * @param {string} to - Target asset symbol
+   * @param {GetLastPriceOptions} [options={}]
+   * @returns {Promise<PriceData>}
+   */
+  async getLastPriceData (from, to, options = {}) {
+    const now = Date.now()
+    const cacheKey = `${from.toUpperCase()}${to.toUpperCase()}`
+    const cached = this.priceDataCacheStore[cacheKey]
+
+    if (!options.forceRefresh && cached) {
+      if (now - cached.lastPriceTimestamp < this.priceCacheDurationMs) {
+        return cached.priceData
+      }
+    }
+
+    const [priceData] = await this.client.getMultiPriceData([{ from, to }])
+    this.priceDataCacheStore[cacheKey] = { priceData, lastPriceTimestamp: now }
+
+    return priceData
+  }
+
+  /**
+   * Returns full price data for multiple asset pairs, with per-pair caching.
+   * @param {PricePair[]} list - Array of asset pairs
+   * @param {GetLastPriceOptions} [options={}]
+   * @returns {Promise<PriceData[]>}
+   */
+  async getMultiLastPriceData (list, options = {}) {
+    const now = Date.now()
+    const toFetch = []
+    const cacheKeys = list.map(({ from, to }) => `${from.toUpperCase()}${to.toUpperCase()}`)
+
+    for (let i = 0; i < list.length; i++) {
+      const cached = this.priceDataCacheStore[cacheKeys[i]]
+      if (options.forceRefresh || !cached || now - cached.lastPriceTimestamp >= this.priceCacheDurationMs) {
+        toFetch.push(list[i])
+      }
+    }
+
+    if (toFetch.length > 0) {
+      const fetchTs = Date.now()
+      const fetched = await this.client.getMultiPriceData(toFetch)
+      toFetch.forEach(({ from, to }, i) => {
+        const key = `${from.toUpperCase()}${to.toUpperCase()}`
+        this.priceDataCacheStore[key] = { priceData: fetched[i], lastPriceTimestamp: fetchTs }
+      })
+    }
+
+    return cacheKeys.map((key) => this.priceDataCacheStore[key].priceData)
   }
 
   /**

@@ -188,4 +188,136 @@ describe('PricingProvider', () => {
       expect(mockClient.getHistoricalPrice).toHaveBeenCalledWith('BTC', 'USD')
     })
   })
+
+  describe('getLastPriceData', () => {
+    const btcPriceData = { lastPrice: 50000, dailyChange: 500, dailyChangeRelative: 0.01 }
+    const btcPriceDataUpdated = { lastPrice: 51000, dailyChange: 1000, dailyChangeRelative: 0.02 }
+    let mockClient
+    let provider
+
+    beforeEach(() => {
+      mockClient = { getMultiPriceData: jest.fn() }
+      provider = new PricingProvider({ client: mockClient, priceCacheDurationMs: 1000 })
+    })
+
+    it('should fetch price data from client on first call', async () => {
+      mockClient.getMultiPriceData.mockResolvedValue([btcPriceData])
+
+      const result = await provider.getLastPriceData('BTC', 'USD')
+
+      expect(result).toEqual(btcPriceData)
+      expect(mockClient.getMultiPriceData).toHaveBeenCalledWith([{ from: 'BTC', to: 'USD' }])
+      expect(mockClient.getMultiPriceData).toHaveBeenCalledTimes(1)
+    })
+
+    it('should return cached price data within cache duration', async () => {
+      mockClient.getMultiPriceData.mockResolvedValue([btcPriceData])
+
+      await provider.getLastPriceData('BTC', 'USD')
+      const result = await provider.getLastPriceData('BTC', 'USD')
+
+      expect(result).toEqual(btcPriceData)
+      expect(mockClient.getMultiPriceData).toHaveBeenCalledTimes(1)
+    })
+
+    it('should fetch new price data after cache expires', async () => {
+      mockClient.getMultiPriceData
+        .mockResolvedValueOnce([btcPriceData])
+        .mockResolvedValueOnce([btcPriceDataUpdated])
+
+      const result1 = await provider.getLastPriceData('BTC', 'USD')
+      await new Promise(resolve => setTimeout(resolve, 1100))
+      const result2 = await provider.getLastPriceData('BTC', 'USD')
+
+      expect(result1).toEqual(btcPriceData)
+      expect(result2).toEqual(btcPriceDataUpdated)
+      expect(mockClient.getMultiPriceData).toHaveBeenCalledTimes(2)
+    })
+
+    it('should bypass cache when forceRefresh is true', async () => {
+      mockClient.getMultiPriceData
+        .mockResolvedValueOnce([btcPriceData])
+        .mockResolvedValueOnce([btcPriceDataUpdated])
+
+      await provider.getLastPriceData('BTC', 'USD')
+      const result = await provider.getLastPriceData('BTC', 'USD', { forceRefresh: true })
+
+      expect(result).toEqual(btcPriceDataUpdated)
+      expect(mockClient.getMultiPriceData).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  describe('getMultiLastPriceData', () => {
+    const btcData = { lastPrice: 50000, dailyChange: 500, dailyChangeRelative: 0.01 }
+    const ethData = { lastPrice: 3000, dailyChange: -50, dailyChangeRelative: -0.016 }
+    let mockClient
+    let provider
+
+    beforeEach(() => {
+      mockClient = { getMultiPriceData: jest.fn() }
+      provider = new PricingProvider({ client: mockClient, priceCacheDurationMs: 1000 })
+    })
+
+    it('should fetch price data for multiple pairs', async () => {
+      mockClient.getMultiPriceData.mockResolvedValue([btcData, ethData])
+
+      const results = await provider.getMultiLastPriceData([
+        { from: 'BTC', to: 'USD' },
+        { from: 'ETH', to: 'USD' }
+      ])
+
+      expect(results).toEqual([btcData, ethData])
+      expect(mockClient.getMultiPriceData).toHaveBeenCalledTimes(1)
+    })
+
+    it('should return cached data within cache duration', async () => {
+      mockClient.getMultiPriceData.mockResolvedValue([btcData, ethData])
+
+      await provider.getMultiLastPriceData([
+        { from: 'BTC', to: 'USD' },
+        { from: 'ETH', to: 'USD' }
+      ])
+      const results = await provider.getMultiLastPriceData([
+        { from: 'BTC', to: 'USD' },
+        { from: 'ETH', to: 'USD' }
+      ])
+
+      expect(results).toEqual([btcData, ethData])
+      expect(mockClient.getMultiPriceData).toHaveBeenCalledTimes(1)
+    })
+
+    it('should only fetch uncached pairs', async () => {
+      mockClient.getMultiPriceData
+        .mockResolvedValueOnce([btcData])
+        .mockResolvedValueOnce([ethData])
+
+      await provider.getMultiLastPriceData([{ from: 'BTC', to: 'USD' }])
+
+      const results = await provider.getMultiLastPriceData([
+        { from: 'BTC', to: 'USD' },
+        { from: 'ETH', to: 'USD' }
+      ])
+
+      expect(results).toEqual([btcData, ethData])
+      // First call fetched BTC, second call fetched only ETH
+      expect(mockClient.getMultiPriceData).toHaveBeenCalledTimes(2)
+      expect(mockClient.getMultiPriceData).toHaveBeenLastCalledWith([{ from: 'ETH', to: 'USD' }])
+    })
+
+    it('should bypass cache when forceRefresh is true', async () => {
+      const btcDataUpdated = { lastPrice: 51000, dailyChange: 1000, dailyChangeRelative: 0.02 }
+      mockClient.getMultiPriceData
+        .mockResolvedValueOnce([btcData])
+        .mockResolvedValueOnce([btcDataUpdated])
+
+      await provider.getMultiLastPriceData([{ from: 'BTC', to: 'USD' }])
+      const results = await provider.getMultiLastPriceData(
+        [{ from: 'BTC', to: 'USD' }],
+        { forceRefresh: true }
+      )
+
+      expect(results).toEqual([btcDataUpdated])
+      expect(mockClient.getMultiPriceData).toHaveBeenCalledTimes(2)
+    })
+  })
 })
