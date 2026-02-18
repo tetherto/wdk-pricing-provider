@@ -23,12 +23,10 @@ describe('PricingProvider', () => {
     let provider
 
     beforeEach(() => {
-      // Create a mock client
       mockClient = {
         getCurrentPrice: jest.fn()
       }
 
-      // Create provider with 1000ms cache duration for easier testing
       provider = new PricingProvider({
         client: mockClient,
         priceCacheDurationMs: 1000
@@ -48,10 +46,7 @@ describe('PricingProvider', () => {
     it('should return cached price within cache duration', async () => {
       mockClient.getCurrentPrice.mockResolvedValue(50000)
 
-      // First call
       await provider.getLastPrice('BTC', 'USD')
-
-      // Second call within cache duration
       const price = await provider.getLastPrice('BTC', 'USD')
 
       expect(price).toBe(50000)
@@ -63,14 +58,24 @@ describe('PricingProvider', () => {
         .mockResolvedValueOnce(50000)
         .mockResolvedValueOnce(51000)
 
-      // First call
       const price1 = await provider.getLastPrice('BTC', 'USD')
 
-      // Wait for cache to expire
       await new Promise(resolve => setTimeout(resolve, 1100))
 
-      // Second call after cache expiration
       const price2 = await provider.getLastPrice('BTC', 'USD')
+
+      expect(price1).toBe(50000)
+      expect(price2).toBe(51000)
+      expect(mockClient.getCurrentPrice).toHaveBeenCalledTimes(2)
+    })
+
+    it('should bypass cache when forceRefresh is true', async () => {
+      mockClient.getCurrentPrice
+        .mockResolvedValueOnce(50000)
+        .mockResolvedValueOnce(51000)
+
+      const price1 = await provider.getLastPrice('BTC', 'USD')
+      const price2 = await provider.getLastPrice('BTC', 'USD', { forceRefresh: true })
 
       expect(price1).toBe(50000)
       expect(price2).toBe(51000)
@@ -84,6 +89,103 @@ describe('PricingProvider', () => {
       await expect(provider.getLastPrice('BTC', 'USD'))
         .rejects
         .toThrow('API Error')
+    })
+  })
+
+  describe('getMultiLastPrices', () => {
+    let mockClient
+    let provider
+
+    beforeEach(() => {
+      mockClient = {
+        getCurrentPrice: jest.fn()
+      }
+
+      provider = new PricingProvider({
+        client: mockClient,
+        priceCacheDurationMs: 1000
+      })
+    })
+
+    it('should fetch prices for multiple pairs', async () => {
+      mockClient.getCurrentPrice
+        .mockResolvedValueOnce(50000)
+        .mockResolvedValueOnce(3000)
+
+      const prices = await provider.getMultiLastPrices([
+        { from: 'BTC', to: 'USD' },
+        { from: 'ETH', to: 'USD' }
+      ])
+
+      expect(prices).toEqual([50000, 3000])
+      expect(mockClient.getCurrentPrice).toHaveBeenCalledTimes(2)
+    })
+
+    it('should return cached prices within cache duration', async () => {
+      mockClient.getCurrentPrice
+        .mockResolvedValueOnce(50000)
+        .mockResolvedValueOnce(3000)
+
+      await provider.getMultiLastPrices([
+        { from: 'BTC', to: 'USD' },
+        { from: 'ETH', to: 'USD' }
+      ])
+
+      const prices = await provider.getMultiLastPrices([
+        { from: 'BTC', to: 'USD' },
+        { from: 'ETH', to: 'USD' }
+      ])
+
+      expect(prices).toEqual([50000, 3000])
+      expect(mockClient.getCurrentPrice).toHaveBeenCalledTimes(2)
+    })
+
+    it('should only fetch uncached pairs', async () => {
+      mockClient.getCurrentPrice
+        .mockResolvedValueOnce(50000)
+        .mockResolvedValueOnce(3000)
+
+      // Prime cache with BTC/USD
+      await provider.getMultiLastPrices([{ from: 'BTC', to: 'USD' }])
+
+      const prices = await provider.getMultiLastPrices([
+        { from: 'BTC', to: 'USD' },
+        { from: 'ETH', to: 'USD' }
+      ])
+
+      expect(prices).toEqual([50000, 3000])
+      // Only ETH/USD should trigger a new fetch
+      expect(mockClient.getCurrentPrice).toHaveBeenCalledTimes(2)
+    })
+
+    it('should bypass cache when forceRefresh is true', async () => {
+      mockClient.getCurrentPrice
+        .mockResolvedValueOnce(50000)
+        .mockResolvedValueOnce(51000)
+
+      await provider.getMultiLastPrices([{ from: 'BTC', to: 'USD' }])
+      const prices = await provider.getMultiLastPrices(
+        [{ from: 'BTC', to: 'USD' }],
+        { forceRefresh: true }
+      )
+
+      expect(prices).toEqual([51000])
+      expect(mockClient.getCurrentPrice).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  describe('getHistoricalPrice', () => {
+    it('should delegate to client with from and to', async () => {
+      const mockResults = [{ date: 1000, price: 50000 }]
+      const mockClient = {
+        getHistoricalPrice: jest.fn().mockResolvedValue(mockResults)
+      }
+      const provider = new PricingProvider({ client: mockClient })
+
+      const results = await provider.getHistoricalPrice('BTC', 'USD')
+
+      expect(results).toEqual(mockResults)
+      expect(mockClient.getHistoricalPrice).toHaveBeenCalledWith('BTC', 'USD')
     })
   })
 })

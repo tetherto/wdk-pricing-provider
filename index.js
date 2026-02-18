@@ -14,12 +14,34 @@
 // limitations under the License.
 //
 
+/**
+ * @typedef {Object} HistoricalPriceResult
+ * @property {number} date - Timestamp of the price point
+ * @property {number} price - Price at the given timestamp
+ */
+
+/**
+ * @typedef {Object} GetLastPriceOptions
+ * @property {boolean} [forceRefresh=false] - Bypass cache and fetch a fresh price
+ */
+
+/**
+ * @typedef {Object} PricePair
+ * @property {string} from - Source asset symbol
+ * @property {string} to - Target asset symbol
+ */
+
+/**
+ * @typedef {Object} PricingProviderConfig
+ * @property {PricingClient} client - The pricing client instance
+ * @property {number} [priceCacheDurationMs=3600000] - Cache duration in milliseconds, defaults to 1 hour
+ */
+
 export class PricingClient {
   /**
-   * Returns the current price of the asset pair, cached for the duration of the priceCacheDurationMs
-   * @async
-   * @param {string} from
-   * @param {string} to
+   * Returns the current price of an asset pair
+   * @param {string} from - Source asset symbol
+   * @param {string} to - Target asset symbol
    * @returns {Promise<number>}
    */
   async getCurrentPrice (from, to) {
@@ -27,42 +49,50 @@ export class PricingClient {
   }
 
   /**
-   * Returns the historical price of the asset pair
-   * @async
-   * @param {HistoricalPriceOptions} opts
+   * Returns the current prices for multiple asset pairs
+   * @param {PricePair[]} list - Array of asset pairs
+   * @returns {Promise<number[]>}
+   */
+  async getMultiCurrentPrices (list) {
+    return Promise.all(list.map((pair) => this.getCurrentPrice(pair.from, pair.to)))
+  }
+
+  /**
+   * Returns the historical price of an asset pair
+   * @param {string} from - Source asset symbol
+   * @param {string} to - Target asset symbol
    * @returns {Promise<HistoricalPriceResult[]>}
    */
-  async getHistoricalPrice (opts) {
+  async getHistoricalPrice (from, to) {
     throw new Error('Not implemented')
   }
 }
 
 export class PricingProvider {
   /**
-   * Creates a new PricingProvider instance.
-   * @param {Config} config - The configuration object.
-   * @param {config.client} config.client - The client instance.
-   * @param {config.priceCacheDurationMs} config.priceCacheDurationMs - The duration of the price cache in milliseconds, defaults to 1 hour
+   * Creates a new PricingProvider instance
+   * @param {PricingProviderConfig} config
    */
   constructor (config = {}) {
     this.client = config.client
     this.priceCacheDurationMs = config.priceCacheDurationMs || 60 * 60 * 1000
 
+    /** @type {Object<string, { lastPriceValue: number, lastPriceTimestamp: number }>} */
     this.priceCacheStore = {}
   }
 
   /**
-   * Returns the last fetched price of the asset pair, cached for the duration of the priceCacheDurationMs
-   * @async
-   * @param {string} from
-   * @param {string} to
+   * Returns the last fetched price of an asset pair, cached for the duration of priceCacheDurationMs
+   * @param {string} from - Source asset symbol
+   * @param {string} to - Target asset symbol
+   * @param {GetLastPriceOptions} [options={}]
    * @returns {Promise<number>}
    */
-  async getLastPrice (from, to) {
+  async getLastPrice (from, to, options = {}) {
     const now = Date.now()
 
     const cacheKey = `${from.toUpperCase()}${to.toUpperCase()}`
-    if (this.priceCacheStore[cacheKey]) {
+    if (!options.forceRefresh && this.priceCacheStore[cacheKey]) {
       const lastPriceTimestamp = this.priceCacheStore[cacheKey].lastPriceTimestamp
       if (lastPriceTimestamp && now - lastPriceTimestamp < this.priceCacheDurationMs) {
         return this.priceCacheStore[cacheKey].lastPriceValue
@@ -79,12 +109,22 @@ export class PricingProvider {
   }
 
   /**
-   * Returns the historical price of the asset pair
-   * @async
-   * @param {HistoricalPriceOptions} opts
+   * Returns the last fetched prices for multiple asset pairs, with caching
+   * @param {PricePair[]} list - Array of asset pairs
+   * @param {GetLastPriceOptions} [options={}]
+   * @returns {Promise<number[]>}
+   */
+  async getMultiLastPrices (list, options = {}) {
+    return Promise.all(list.map(({ from, to }) => this.getLastPrice(from, to, options)))
+  }
+
+  /**
+   * Returns the historical price of an asset pair
+   * @param {string} from - Source asset symbol
+   * @param {string} to - Target asset symbol
    * @returns {Promise<HistoricalPriceResult[]>}
    */
-  async getHistoricalPrice (opts) {
-    return this.client.getHistoricalPrice(opts)
+  async getHistoricalPrice (from, to) {
+    return this.client.getHistoricalPrice(from, to)
   }
 }
