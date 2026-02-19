@@ -21,7 +21,12 @@
  */
 
 /**
- * @typedef {Object} GetLastPriceOptions
+ * @typedef {Object} HistoricalPriceOptions
+ * @property {string} [timeframe='1D'] - Candle timeframe. e.g. '1m', '5m', '15m', '1h', '6h', '1D'
+ */
+
+/**
+ * @typedef {Object} GetPriceOptions
  * @property {boolean} [forceRefresh=false] - Bypass cache and fetch a fresh price
  */
 
@@ -83,9 +88,10 @@ export class PricingClient {
    * Returns the historical price of an asset pair
    * @param {string} from - Source asset symbol
    * @param {string} to - Target asset symbol
+   * @param {HistoricalPriceOptions} [opts={}]
    * @returns {Promise<HistoricalPriceResult[]>}
    */
-  async getHistoricalPrice (from, to) {
+  async getHistoricalPrice (from, to, opts = {}) {
     throw new Error('Not implemented')
   }
 }
@@ -110,7 +116,7 @@ export class PricingProvider {
    * Returns the last fetched price of an asset pair, cached for the duration of priceCacheDurationMs
    * @param {string} from - Source asset symbol
    * @param {string} to - Target asset symbol
-   * @param {GetLastPriceOptions} [options={}]
+   * @param {GetPriceOptions} [options={}]
    * @returns {Promise<number>}
    */
   async getLastPrice (from, to, options = {}) {
@@ -136,7 +142,7 @@ export class PricingProvider {
   /**
    * Returns the last fetched prices for multiple asset pairs, with caching
    * @param {PricePair[]} list - Array of asset pairs
-   * @param {GetLastPriceOptions} [options={}]
+   * @param {GetPriceOptions} [options={}]
    * @returns {Promise<number[]>}
    */
   async getMultiLastPrices (list, options = {}) {
@@ -148,7 +154,7 @@ export class PricingProvider {
    * Includes last price, daily change, and relative daily change.
    * @param {string} from - Source asset symbol
    * @param {string} to - Target asset symbol
-   * @param {GetLastPriceOptions} [options={}]
+   * @param {GetPriceOptions} [options={}]
    * @returns {Promise<PriceData>}
    */
   async getLastPriceData (from, to, options = {}) {
@@ -171,7 +177,7 @@ export class PricingProvider {
   /**
    * Returns full price data for multiple asset pairs, with per-pair caching.
    * @param {PricePair[]} list - Array of asset pairs
-   * @param {GetLastPriceOptions} [options={}]
+   * @param {GetPriceOptions} [options={}]
    * @returns {Promise<PriceData[]>}
    */
   async getMultiLastPriceData (list, options = {}) {
@@ -202,9 +208,10 @@ export class PricingProvider {
    * Returns the historical price of an asset pair
    * @param {string} from - Source asset symbol
    * @param {string} to - Target asset symbol
+   * @param {HistoricalPriceOptions} [opts={}]
    * @returns {Promise<HistoricalPriceResult[]>}
    */
-  async getHistoricalPrice (from, to) {
-    return this.client.getHistoricalPrice(from, to)
+  async getHistoricalPrice (from, to, opts = {}) {
+    return this.client.getHistoricalPrice(from, to, opts)
   }
 }

@@ -2,7 +2,7 @@ export class PricingClient {
     getCurrentPrice(from: string, to: string): Promise<number>;
     getMultiCurrentPrices(list: PricePair[]): Promise<number[]>;
     getMultiPriceData(list: PricePair[]): Promise<PriceData[]>;
-    getHistoricalPrice(from: string, to: string): Promise<HistoricalPriceResult[]>;
+    getHistoricalPrice(from: string, to: string, opts?: HistoricalPriceOptions): Promise<HistoricalPriceResult[]>;
 }
 export class PricingProvider {
     constructor(config?: PricingProviderConfig);
@@ -10,11 +10,11 @@ export class PricingProvider {
     priceCacheDurationMs: number;
     priceCacheStore: { [key: string]: { lastPriceValue: number; lastPriceTimestamp: number } };
     priceDataCacheStore: { [key: string]: { priceData: PriceData; lastPriceTimestamp: number } };
-    getLastPrice(from: string, to: string, options?: GetLastPriceOptions): Promise<number>;
-    getMultiLastPrices(list: PricePair[], options?: GetLastPriceOptions): Promise<number[]>;
-    getLastPriceData(from: string, to: string, options?: GetLastPriceOptions): Promise<PriceData>;
-    getMultiLastPriceData(list: PricePair[], options?: GetLastPriceOptions): Promise<PriceData[]>;
-    getHistoricalPrice(from: string, to: string): Promise<HistoricalPriceResult[]>;
+    getLastPrice(from: string, to: string, options?: GetPriceOptions): Promise<number>;
+    getMultiLastPrices(list: PricePair[], options?: GetPriceOptions): Promise<number[]>;
+    getLastPriceData(from: string, to: string, options?: GetPriceOptions): Promise<PriceData>;
+    getMultiLastPriceData(list: PricePair[], options?: GetPriceOptions): Promise<PriceData[]>;
+    getHistoricalPrice(from: string, to: string, opts?: HistoricalPriceOptions): Promise<HistoricalPriceResult[]>;
 }
 export type PriceData = {
     /** The last traded price */
@@ -28,7 +28,11 @@ export type HistoricalPriceResult = {
     date: number;
     price: number;
 };
-export type GetLastPriceOptions = {
+export type HistoricalPriceOptions = {
+    /** Candle timeframe. Defaults to '1D' (daily). e.g. '1m', '5m', '15m', '1h', '6h', '1D' */
+    timeframe?: string;
+};
+export type GetPriceOptions = {
     forceRefresh?: boolean;
 };
 export type PricePair = {

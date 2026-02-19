@@ -185,7 +185,17 @@ describe('PricingProvider', () => {
       const results = await provider.getHistoricalPrice('BTC', 'USD')
 
       expect(results).toEqual(mockResults)
-      expect(mockClient.getHistoricalPrice).toHaveBeenCalledWith('BTC', 'USD')
+      expect(mockClient.getHistoricalPrice).toHaveBeenCalledWith('BTC', 'USD', {})
+    })
+
+    it('should forward timeframe option to client', async () => {
+      const mockResults = [{ date: 1000, price: 50000 }]
+      const mockClient = { getHistoricalPrice: jest.fn().mockResolvedValue(mockResults) }
+      const provider = new PricingProvider({ client: mockClient })
+
+      await provider.getHistoricalPrice('BTC', 'USD', { timeframe: '1h' })
+
+      expect(mockClient.getHistoricalPrice).toHaveBeenCalledWith('BTC', 'USD', { timeframe: '1h' })
     })
   })
 
