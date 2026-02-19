@@ -16,7 +16,7 @@
 
 /**
  * @typedef {Object} HistoricalPriceResult
- * @property {number} date - Timestamp of the price point
+ * @property {number} timestamp - Timestamp of the price point
  * @property {number} price - Price at the given timestamp
  */
 
@@ -66,7 +66,9 @@ export class PricingClient {
    * @returns {Promise<number[]>}
    */
   async getMultiCurrentPrices (list) {
-    return Promise.all(list.map((pair) => this.getCurrentPrice(pair.from, pair.to)))
+    return Promise.all(
+      list.map((pair) => this.getCurrentPrice(pair.from, pair.to))
+    )
   }
 
   /**
@@ -77,11 +79,13 @@ export class PricingClient {
    * @returns {Promise<PriceData[]>}
    */
   async getMultiPriceData (list) {
-    return Promise.all(list.map(async ({ from, to }) => ({
-      lastPrice: await this.getCurrentPrice(from, to),
-      dailyChange: 0,
-      dailyChangeRelative: 0
-    })))
+    return Promise.all(
+      list.map(async ({ from, to }) => ({
+        lastPrice: await this.getCurrentPrice(from, to),
+        dailyChange: 0,
+        dailyChangeRelative: 0
+      }))
+    )
   }
 
   /**
@@ -91,7 +95,7 @@ export class PricingClient {
    * @param {HistoricalPriceOptions} [opts={}]
    * @returns {Promise<HistoricalPriceResult[]>}
    */
-  async getHistoricalPrice (from, to, opts = {}) {
+  async getHistoricalPrice (from, to, opts = { timeframe: '1D' }) {
     throw new Error('Not implemented')
   }
 }
@@ -124,8 +128,12 @@ export class PricingProvider {
 
     const cacheKey = `${from.toUpperCase()}${to.toUpperCase()}`
     if (!options.forceRefresh && this.priceCacheStore[cacheKey]) {
-      const lastPriceTimestamp = this.priceCacheStore[cacheKey].lastPriceTimestamp
-      if (lastPriceTimestamp && now - lastPriceTimestamp < this.priceCacheDurationMs) {
+      const lastPriceTimestamp =
+        this.priceCacheStore[cacheKey].lastPriceTimestamp
+      if (
+        lastPriceTimestamp &&
+        now - lastPriceTimestamp < this.priceCacheDurationMs
+      ) {
         return this.priceCacheStore[cacheKey].lastPriceValue
       }
     }
@@ -146,7 +154,9 @@ export class PricingProvider {
    * @returns {Promise<number[]>}
    */
   async getMultiLastPrices (list, options = {}) {
-    return Promise.all(list.map(({ from, to }) => this.getLastPrice(from, to, options)))
+    return Promise.all(
+      list.map(({ from, to }) => this.getLastPrice(from, to, options))
+    )
   }
 
   /**
@@ -183,11 +193,17 @@ export class PricingProvider {
   async getMultiLastPriceData (list, options = {}) {
     const now = Date.now()
     const toFetch = []
-    const cacheKeys = list.map(({ from, to }) => `${from.toUpperCase()}${to.toUpperCase()}`)
+    const cacheKeys = list.map(
+      ({ from, to }) => `${from.toUpperCase()}${to.toUpperCase()}`
+    )
 
     for (let i = 0; i < list.length; i++) {
       const cached = this.priceDataCacheStore[cacheKeys[i]]
-      if (options.forceRefresh || !cached || now - cached.lastPriceTimestamp >= this.priceCacheDurationMs) {
+      if (
+        options.forceRefresh ||
+        !cached ||
+        now - cached.lastPriceTimestamp >= this.priceCacheDurationMs
+      ) {
         toFetch.push(list[i])
       }
     }
@@ -197,7 +213,10 @@ export class PricingProvider {
       const fetched = await this.client.getMultiPriceData(toFetch)
       toFetch.forEach(({ from, to }, i) => {
         const key = `${from.toUpperCase()}${to.toUpperCase()}`
-        this.priceDataCacheStore[key] = { priceData: fetched[i], lastPriceTimestamp: fetchTs }
+        this.priceDataCacheStore[key] = {
+          priceData: fetched[i],
+          lastPriceTimestamp: fetchTs
+        }
       })
     }
 
@@ -211,7 +230,7 @@ export class PricingProvider {
    * @param {HistoricalPriceOptions} [opts={}]
    * @returns {Promise<HistoricalPriceResult[]>}
    */
-  async getHistoricalPrice (from, to, opts = {}) {
+  async getHistoricalPrice (from, to, opts = { timeframe: '1D' }) {
     return this.client.getHistoricalPrice(from, to, opts)
   }
 }
