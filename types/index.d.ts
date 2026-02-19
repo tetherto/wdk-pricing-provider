@@ -5,7 +5,8 @@
  */
 /**
  * @typedef {Object} HistoricalPriceOptions
- * @property {string} [timeframe='1D'] - Candle timeframe. e.g. '1m', '5m', '15m', '1h', '6h', '1D'
+ * @property {number} start Start of the time range as a Unix timestamp in milliseconds
+ * @property {number} end End of the time range as a Unix timestamp in milliseconds
  */
 /**
  * @typedef {Object} GetPriceOptions
@@ -132,9 +133,13 @@ export type HistoricalPriceResult = {
 };
 export type HistoricalPriceOptions = {
     /**
-     * - Candle timeframe. e.g. '1m', '5m', '15m', '1h', '6h', '1D'
+     * Start of the time range as a Unix timestamp in milliseconds
      */
-    timeframe?: string;
+    start: number;
+    /**
+     * End of the time range as a Unix timestamp in milliseconds
+     */
+    end: number;
 };
 export type GetPriceOptions = {
     /**
