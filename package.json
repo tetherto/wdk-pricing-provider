@@ -1,6 +1,6 @@
 {
   "name": "@tetherto/wdk-pricing-provider",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "Asset pricing provider for the WDK.",
   "keywords": [
     "tetherto",
@@ -16,7 +16,7 @@
   "license": "APACHE-2.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/tetherto/lib-wallet-pricing-provider.git"
+    "url": "git://github.com/tetherto/wdk-pricing-provider.git"
   },
   "main": "index.js",
   "scripts": {
@@ -32,12 +32,6 @@
   "type": "module",
   "author": "Tether",
   "types": "./index.d.ts",
-  "packageManager": "npm",
-  "engines": {
-    "node": ">=18",
-    "bare": ">=1.2.0",
-    "npm": ">=10.7.0"
-  },
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
@@ -59,7 +53,7 @@
     ]
   },
   "dependencies": {
-    "bare-wdk-runtime": "^2.0.1"
+    "bare-node-runtime": "^1.2.0"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
