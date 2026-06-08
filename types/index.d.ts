@@ -1,35 +1,3 @@
-/**
- * @typedef {Object} HistoricalPriceResult
- * @property {number} timestamp - Timestamp of the price point
- * @property {number} price - Price at the given timestamp
- */
-/**
- * @typedef {Object} HistoricalPriceOptions
- * @property {number} start - Start of the time range as a Unix timestamp in milliseconds
- * @property {number} end - End of the time range as a Unix timestamp in milliseconds
- * @property {string} [timeframe='1D'] - Timeframe for the historical data (e.g. '1D', '1h', '1m')
- */
-/**
- * @typedef {Object} GetPriceOptions
- * @property {boolean} [forceRefresh=false] - Bypass cache and fetch a fresh price
- */
-/**
- * @typedef {Object} PricePair
- * @property {string} from - Source asset symbol
- * @property {string} to - Target asset symbol
- */
-/**
- * @typedef {Object} PriceData
- * @property {number} lastPrice - The last traded price
- * @property {number} dailyChange - Absolute price change over the last 24h
- * @property {number} dailyChangeRelative - Relative price change over the last 24h (multiply by 100 for percentage)
- */
-/**
- * @typedef {Object} PricingProviderConfig
- * @property {PricingClient | PricingClient[]} client - An instance of a class that implements {@link PricingClient}. It's also possible to provide an array of clients instead. In such case, connection errors will cause the wallet to automatically fallback on the next provider in the list.
- * @property {number} [retries] - If set and if 'client' is a list of clients, the number of additional retry attempts after the initial call fails. Total attempts = `1 + retries`. For example, `retries: 3` with 4 providers will try each provider once before throwing. If `retries` exceeds the number of providers, the failover will loop back and retry already-failed providers in round-robin order. Default: 3.
- * @property {number} [priceCacheDurationMs=3600000] - Cache duration in milliseconds, defaults to 1 hour
- */
 export class PricingClient {
     /**
      * Returns the current price of an asset pair, or `null` if the pair cannot be resolved
