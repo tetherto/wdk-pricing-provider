@@ -1,25 +1,25 @@
 export class PricingClient {
     /**
-     * Returns the current price of an asset pair
+     * Returns the current price of an asset pair, or `null` if the pair cannot be resolved
      * @param {string} from - Source asset symbol
      * @param {string} to - Target asset symbol
-     * @returns {Promise<number>}
+     * @returns {Promise<number | null>}
      */
-    getCurrentPrice(from: string, to: string): Promise<number>;
+    getCurrentPrice(from: string, to: string): Promise<number | null>;
     /**
-     * Returns the current prices for multiple asset pairs
+     * Returns the current prices for multiple asset pairs. Entries whose pair
+     * cannot be resolved are `null`.
      * @param {PricePair[]} list - Array of asset pairs
-     * @returns {Promise<number[]>}
+     * @returns {Promise<Array<number | null>>}
      */
-    getMultiCurrentPrices(list: PricePair[]): Promise<number[]>;
+    getMultiCurrentPrices(list: PricePair[]): Promise<Array<number | null>>;
     /**
      * Returns full price data (last price, daily change) for multiple asset pairs.
-     * Defaults to calling getCurrentPrice per pair with zeroed change fields.
-     * Override in subclasses for efficient batch fetching with full data.
+     * Entries whose pair cannot be resolved are `null`.
      * @param {PricePair[]} list - Array of asset pairs
-     * @returns {Promise<PriceData[]>}
+     * @returns {Promise<Array<PriceData | null>>}
      */
-    getMultiPriceData(list: PricePair[]): Promise<PriceData[]>;
+    getMultiPriceData(list: PricePair[]): Promise<Array<PriceData | null>>;
     /**
      * Returns the historical price of an asset pair
      * @param {string} from - Source asset symbol
@@ -35,14 +35,19 @@ export class PricingProvider {
      * @param {PricingProviderConfig} config
      */
     constructor(config?: PricingProviderConfig);
+    /**
+     * @type {PricingClient}
+     */
     client: PricingClient;
     priceCacheDurationMs: number;
+    /** @type {Object<string, { lastPriceValue: number, lastPriceTimestamp: number }>} */
     priceCacheStore: {
         [x: string]: {
             lastPriceValue: number;
             lastPriceTimestamp: number;
         };
     };
+    /** @type {Object<string, { priceData: PriceData, lastPriceTimestamp: number }>} */
     priceDataCacheStore: {
         [x: string]: {
             priceData: PriceData;
@@ -101,15 +106,15 @@ export type HistoricalPriceResult = {
 };
 export type HistoricalPriceOptions = {
     /**
-     * Start of the time range as a Unix timestamp in milliseconds
+     * - Start of the time range as a Unix timestamp in milliseconds
      */
     start: number;
     /**
-     * End of the time range as a Unix timestamp in milliseconds
+     * - End of the time range as a Unix timestamp in milliseconds
      */
     end: number;
     /**
-     * Timeframe for the historical data (e.g. '1D', '1h', '1m'). Defaults to '1D'.
+     * - Timeframe for the historical data (e.g. '1D', '1h', '1m')
      */
     timeframe?: string;
 };

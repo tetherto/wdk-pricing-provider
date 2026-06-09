@@ -57,19 +57,20 @@ import FailoverProvider from '@tetherto/wdk-failover-provider'
 
 export class PricingClient {
   /**
-   * Returns the current price of an asset pair
+   * Returns the current price of an asset pair, or `null` if the pair cannot be resolved
    * @param {string} from - Source asset symbol
    * @param {string} to - Target asset symbol
-   * @returns {Promise<number>}
+   * @returns {Promise<number | null>}
    */
   async getCurrentPrice (from, to) {
     throw new Error('Not implemented')
   }
 
   /**
-   * Returns the current prices for multiple asset pairs
+   * Returns the current prices for multiple asset pairs. Entries whose pair
+   * cannot be resolved are `null`.
    * @param {PricePair[]} list - Array of asset pairs
-   * @returns {Promise<number[]>}
+   * @returns {Promise<Array<number | null>>}
    */
   async getMultiCurrentPrices (list) {
     throw new Error('Not implemented')
@@ -77,8 +78,9 @@ export class PricingClient {
 
   /**
    * Returns full price data (last price, daily change) for multiple asset pairs.
+   * Entries whose pair cannot be resolved are `null`.
    * @param {PricePair[]} list - Array of asset pairs
-   * @returns {Promise<PriceData[]>}
+   * @returns {Promise<Array<PriceData | null>>}
    */
   async getMultiPriceData (list) {
     throw new Error('Not implemented')
