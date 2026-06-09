@@ -1,6 +1,6 @@
 {
   "name": "@tetherto/wdk-pricing-provider",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "description": "Asset pricing provider for the WDK.",
   "keywords": [
     "tetherto",
@@ -54,14 +54,14 @@
   },
   "dependencies": {
     "@tetherto/wdk-failover-provider": "1.0.0-beta.2",
-    "bare-node-runtime": "^1.2.0"
+    "bare-node-runtime": "^1.4.0"
   },
   "devDependencies": {
-    "brittle": "^3.0.0",
+    "brittle": "^3.19.1",
     "cross-env": "^10.1.0",
-    "jest": "^30.2.0",
+    "jest": "^30.4.2",
     "standard": "^17.1.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.9.3"
   },
   "jest": {
     "testPathIgnorePatterns": [
