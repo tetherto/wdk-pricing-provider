@@ -1,6 +1,6 @@
 {
   "name": "@tetherto/wdk-pricing-provider",
-  "version": "1.0.0-beta.5",
+  "version": "1.0.0-beta.6",
   "description": "Asset pricing provider for the WDK.",
   "keywords": [
     "tetherto",
