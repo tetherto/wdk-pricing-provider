@@ -4,9 +4,9 @@ Simple, cache-aware pricing provider utilities for WDK-based apps and the [WDK U
 
 ## 🔍 About WDK
 
-This module is part of the WDK (Wallet Development Kit) ecosystem, which helps developers build secure, non-custodial wallets and related services.
+This module is part of WDK (Wallet Development Kit) by Tether, which helps developers build secure, non-custodial wallets and related services.
 
-For more on the WDK project, visit [docs.wallet.tether.io](https://docs.wallet.tether.io).
+See the [Price Rates documentation](https://docs.wdk.tether.io/tools/price-rates/). For the complete ecosystem, see the [general WDK documentation](https://docs.wdk.tether.io/).
 
 ## ✨ Features
 

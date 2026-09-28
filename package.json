@@ -1,7 +1,8 @@
 {
   "name": "@tetherto/wdk-pricing-provider",
   "version": "1.0.0-beta.6",
-  "description": "Asset pricing provider for the WDK.",
+  "description": "Asset pricing provider for WDK (Wallet Development Kit) by Tether.",
+  "homepage": "https://docs.wdk.tether.io/tools/price-rates/",
   "keywords": [
     "tetherto",
     "wdk",
