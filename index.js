@@ -37,8 +37,8 @@ import FailoverProvider from '@tetherto/wdk-failover-provider'
 
 /**
  * @typedef {Object} PricePair
- * @property {string} from - Source asset symbol
- * @property {string} to - Target asset symbol
+ * @property {string} from - Source asset common ticker symbol (e.g. 'USDT')
+ * @property {string} to - Target asset common ticker symbol (e.g. 'USD')
  */
 
 /**
@@ -55,11 +55,22 @@ import FailoverProvider from '@tetherto/wdk-failover-provider'
  * @property {number} [priceCacheDurationMs=3600000] - Cache duration in milliseconds, defaults to 1 hour
  */
 
+/**
+ * Abstract price source. `from` and `to` on every method are common ticker
+ * symbols (e.g. 'BTC', 'USDT', 'USD'). An implementation translates them to
+ * its vendor's vocabulary internally and matches them case-insensitively — the
+ * provider passes them through unchanged — so callers can swap clients without
+ * changing the symbols they pass.
+ *
+ * A pair the vendor cannot resolve yields `null` in its position, never a
+ * thrown error, so one unknown symbol cannot fail a whole batch. Batch results
+ * are returned in the order they were asked for.
+ */
 export class PricingClient {
   /**
    * Returns the current price of an asset pair, or `null` if the pair cannot be resolved
-   * @param {string} from - Source asset symbol
-   * @param {string} to - Target asset symbol
+   * @param {string} from - Source asset common ticker symbol (e.g. 'BTC')
+   * @param {string} to - Target asset common ticker symbol (e.g. 'USD')
    * @returns {Promise<number | null>}
    */
   async getCurrentPrice (from, to) {
@@ -88,8 +99,8 @@ export class PricingClient {
 
   /**
    * Returns the historical price of an asset pair
-   * @param {string} from - Source asset symbol
-   * @param {string} to - Target asset symbol
+   * @param {string} from - Source asset common ticker symbol (e.g. 'BTC')
+   * @param {string} to - Target asset common ticker symbol (e.g. 'USD')
    * @param {HistoricalPriceOptions} [opts={}]
    * @returns {Promise<HistoricalPriceResult[]>}
    */
@@ -138,8 +149,8 @@ export class PricingProvider {
 
   /**
    * Returns the last fetched price of an asset pair, cached for the duration of priceCacheDurationMs
-   * @param {string} from - Source asset symbol
-   * @param {string} to - Target asset symbol
+   * @param {string} from - Source asset common ticker symbol (e.g. 'BTC')
+   * @param {string} to - Target asset common ticker symbol (e.g. 'USD')
    * @param {GetPriceOptions} [options={}]
    * @returns {Promise<number>}
    */
@@ -182,8 +193,8 @@ export class PricingProvider {
   /**
    * Returns full price data for an asset pair, cached for the duration of priceCacheDurationMs.
    * Includes last price, daily change, and relative daily change.
-   * @param {string} from - Source asset symbol
-   * @param {string} to - Target asset symbol
+   * @param {string} from - Source asset common ticker symbol (e.g. 'BTC')
+   * @param {string} to - Target asset common ticker symbol (e.g. 'USD')
    * @param {GetPriceOptions} [options={}]
    * @returns {Promise<PriceData>}
    */
@@ -245,8 +256,8 @@ export class PricingProvider {
 
   /**
    * Returns the historical price of an asset pair
-   * @param {string} from - Source asset symbol
-   * @param {string} to - Target asset symbol
+   * @param {string} from - Source asset common ticker symbol (e.g. 'BTC')
+   * @param {string} to - Target asset common ticker symbol (e.g. 'USD')
    * @param {HistoricalPriceOptions} [opts={}]
    * @returns {Promise<HistoricalPriceResult[]>}
    */
