@@ -1,6 +1,6 @@
 # @tetherto/wdk-pricing-provider
 
-Simple, cache-aware pricing provider utilities for WDK-based apps and the [WDK UI Kit](https://github.com/tetherto/wdk-uikit-react-native). It defines two core building blocks: `PricingClient` (an abstract fetcher that you implement) and `PricingProvider` (a wrapper that adds caching and a unified API).
+Simple, cache-aware pricing provider utilities for WDK-based apps. It defines two core building blocks: `PricingClient` (an abstract fetcher that you implement) and `PricingProvider` (a wrapper that adds caching and a unified API).
 
 ## 🔍 About WDK
 
